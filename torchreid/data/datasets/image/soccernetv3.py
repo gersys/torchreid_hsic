@@ -13,26 +13,43 @@ class Soccernetv3(ImageDataset):
     evaluation.
     """
     dataset_dir = 'soccernetv3'
+    bias_dataset_dir = 'soccernetv3_bias'
+    
 
     def __init__(self, root='', soccernetv3_training_subset=1.0, **kwargs):
         assert 1.0 >= soccernetv3_training_subset > 0.0
+        
 
         self.root = osp.abspath(osp.expanduser(root))
+        
         self.dataset_dir = osp.join(self.root, self.dataset_dir)
+        self.bias_dataset_dir = osp.join(self.root, self.bias_dataset_dir)
+        
         self.reid_dataset_dir = self.download_soccernet_dataset(self.dataset_dir, ["valid", "train"])
-
+        self.bias_reid_dataset_dir = osp.join(self.bias_dataset_dir, "reid")
+        
         self.train_dir = osp.join(self.reid_dataset_dir, 'train')
         self.query_dir = osp.join(self.reid_dataset_dir, 'valid/query')
         self.gallery_dir = osp.join(self.reid_dataset_dir, 'valid/gallery')
+        
+        self.bias_train_dir = osp.join(self.bias_reid_dataset_dir, 'train')
+        self.bias_query_dir = osp.join(self.bias_reid_dataset_dir, 'valid/query')
+        self.bias_gallery_dir = osp.join(self.bias_reid_dataset_dir, 'valid/gallery')
+
 
         required_files = [
-            self.reid_dataset_dir, self.train_dir, self.query_dir, self.gallery_dir
+            self.reid_dataset_dir, self.train_dir, self.query_dir, self.gallery_dir,
+            self.bias_reid_dataset_dir , self.bias_train_dir, self.bias_query_dir, self.bias_gallery_dir
         ]
 
         self.check_before_run(required_files)
 
         train, _, _ = self.process_dir(self.train_dir, {}, relabel=True, soccernetv3_training_subset=soccernetv3_training_subset)
+        train_bias, _, _ = self.process_dir(self.bias_train_dir, {}, relabel=True, soccernetv3_training_subset=soccernetv3_training_subset)
 
+
+        kwargs['bias_train'] = train_bias
+        
         query, pid2label, ids_counter = self.process_dir(self.query_dir, {}, 0)
         gallery, pid2label, ids_counter = self.process_dir(self.gallery_dir, pid2label, ids_counter)
 
@@ -129,6 +146,7 @@ class Soccernetv3(ImageDataset):
     @staticmethod
     def get_bbox_index(filepath):
         return int(os.path.basename(filepath).split("-")[0])
+
 
 
 class Soccernetv3Test(Soccernetv3):

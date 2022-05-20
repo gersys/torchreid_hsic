@@ -66,6 +66,12 @@ class Dataset(object):
             gallery = [(*items, 0) for items in gallery]
 
         self.train = train
+        
+        if 'bias_train' in kwargs.keys():
+            self.bias_train = kwargs['bias_train']
+        else:
+            self.bias_train = None
+        
         self.query = query
         self.gallery = gallery
         self.transform = transform
@@ -330,6 +336,7 @@ class ImageDataset(Dataset):
         img = read_image(img_path)
         if self.transform is not None:
             img = self._transform_image(self.transform, self.k_tfm, img)
+            
         item = {
             'img': img,
             'pid': pid,
@@ -337,6 +344,15 @@ class ImageDataset(Dataset):
             'impath': img_path,
             'dsetid': dsetid
         }
+            
+        if not self.bias_train == None and self.mode =='train':
+            bias_img_path, _ , _  = self.bias_train[index]
+            bias_img = read_image(bias_img_path)
+            if self.transform is not None:
+                bias_img = self._transform_image(self.transform, self.k_tfm, bias_img)
+                
+            item['bias_img'] = bias_img
+        
         return item
 
     def show_summary(self):
