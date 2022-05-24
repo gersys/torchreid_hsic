@@ -70,10 +70,11 @@ def build_optimizer(
             )
         )
 
-    if not isinstance(model, nn.Module):
-        raise TypeError(
-            'model given to build_optimizer must be an instance of nn.Module'
-        )
+    # if not isinstance(model, nn.Module):
+    #     raise TypeError(
+    #         'model given to build_optimizer must be an instance of nn.Module'
+    #     )
+    
 
     if staged_lr:
         if isinstance(new_layers, str):
@@ -107,8 +108,17 @@ def build_optimizer(
             },
         ]
 
+    elif isinstance(model, list):
+        param_groups = []
+        for m in model:
+            param_groups+=list(m.parameters())
+        
+        
     else:
+    
         param_groups = model.parameters()
+        
+    
 
     if optim == 'adam':
         optimizer = torch.optim.Adam(
