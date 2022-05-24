@@ -458,6 +458,13 @@ class Engine(object):
         imgs = data['img']
         pids = data['pid']
         return imgs, pids
+    
+    def parse_data_for_train_hsic(self, data):
+        imgs = data['img']
+        bias_imgs = data['bias_img']
+        pids = data['pid']
+        
+        return imgs, bias_imgs , pids
 
     def parse_data_for_eval(self, data):
         imgs = data['img']
